@@ -1,18 +1,14 @@
 defmodule Todo do
-  @moduledoc """
-  Documentation for `Todo`.
-  """
 
-  @doc """
-  Hello world.
+  def new() do
+    Dictionary.new()
+  end
 
-  ## Examples
+  def add_entry(todo, date, title) do
+    Dictionary.add(todo, date, title)
+  end
 
-      iex> Todo.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def entries(todo, date) do
+    Map.get(todo, date)
   end
 end
