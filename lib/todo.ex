@@ -43,4 +43,17 @@ defmodule Todo do
         %Todo{todo | entries: new_entries}
     end
   end
+
+  defimpl Collectable, for: Todo do
+    def into(original) do
+      {original, &into_callback/2}
+    end
+
+    defp into_callback(todo, {:cont, entry}) do
+      Todo.add_entry(todo, entry)
+    end
+
+    defp into_callback(todo, :done), do: todo
+    defp into_callback(todo, :halt), do: :ok
+  end
 end
