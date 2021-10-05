@@ -1,8 +1,12 @@
 defmodule Todo do
   defstruct auto_id: 1, entries: %{}
 
-  def new() do
-    %Todo{}
+  def new(entries \\ []) do
+    Enum.reduce(
+      entries,
+      %Todo{},
+      &add_entry(&2, &1)
+    )
   end
 
   def add_entry(todo, entry) do
@@ -17,6 +21,10 @@ defmodule Todo do
     todo.entries
     |> Stream.filter(fn {_, entry} -> entry.date == date end)
     |> Enum.map(fn {_, entry} -> entry end)
+  end
+
+  def delete_entry(todo, entry_id) do
+    %Todo{todo | entries: Map.delete(todo.entries, entry_id)}
   end
 
   def update_entry(todo, %{} = new_entry) do
