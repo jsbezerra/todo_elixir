@@ -24,3 +24,7 @@ todo-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# IDE folders and files
+/.idea/
+*.iml
