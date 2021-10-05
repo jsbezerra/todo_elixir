@@ -1,6 +1,6 @@
 # Todo
 
-**TODO: Add description**
+Exercises from the [Elixir in Action](https://www.manning.com/books/elixir-in-action-second-edition) book by Saša Jurić.
 
 ## Installation
 
