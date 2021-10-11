@@ -19,6 +19,7 @@ defmodule Todo do
 
   def entries(todo) do
     todo.entries
+    |> Enum.map(fn {_, entry} -> entry end)
   end
 
   def entries(todo, date) do
