@@ -1,5 +1,7 @@
 # Todo
 
+[![Elixir CI](https://github.com/jsbezerra/todo_elixir/actions/workflows/elixir.yml/badge.svg)](https://github.com/jsbezerra/todo_elixir/actions/workflows/elixir.yml)
+
 Exercises from the [Elixir in Action](https://www.manning.com/books/elixir-in-action-second-edition) book by Saša Jurić.
 
 ## Installation
