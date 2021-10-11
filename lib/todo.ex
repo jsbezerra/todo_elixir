@@ -17,6 +17,10 @@ defmodule Todo do
     %Todo{todo | entries: new_entries, auto_id: todo.auto_id + 1}
   end
 
+  def entries(todo) do
+    todo.entries
+  end
+
   def entries(todo, date) do
     todo.entries
     |> Stream.filter(fn {_, entry} -> entry.date == date end)
@@ -76,6 +80,16 @@ defmodule TodoServer do
     send(todo_server, {:add_entry, new_entry})
   end
 
+  def entries(todo_server) do
+    send(todo_server, {:entries, self()})
+
+    receive do
+      {:todo_entries, entries} -> entries
+    after
+      5000 -> {:error, :timeout}
+    end
+  end
+
   def entries(todo_server, date) do
     send(todo_server, {:entries, self(), date})
 
@@ -96,6 +110,11 @@ defmodule TodoServer do
 
   defp process_message(todo, {:add_entry, new_entry}) do
     Todo.add_entry(todo, new_entry)
+  end
+
+  defp process_message(todo, {:entries, caller}) do
+    send(caller, {:todo_entries, Todo.entries(todo)})
+    todo
   end
 
   defp process_message(todo, {:entries, caller, date}) do
