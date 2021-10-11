@@ -86,12 +86,20 @@ defmodule TodoServer do
     end
   end
 
+  def update_entry(todo_server, entry) do
+    send(todo_server, {:update_entry, entry})
+  end
+
   defp process_message(todo, {:add_entry, new_entry}) do
     Todo.add_entry(todo, new_entry)
   end
 
-  defp process_message(todo, {:entries, calle, date}) do
+  defp process_message(todo, {:entries, caller, date}) do
     send(caller, {:todo_entries, Todo.entries(todo, date)})
     todo
+  end
+
+  defp process_message(todo, {:update_entry, entry}) do
+    Todo.update_entry(todo, entry)
   end
 end
