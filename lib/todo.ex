@@ -57,3 +57,26 @@ defmodule Todo do
     defp into_callback(todo, :halt), do: :ok
   end
 end
+
+defmodule TodoServer do
+  def start do
+    spawn(fn -> loop(Todo.new()) end)
+  end
+
+  defp loop(todo) do
+    new_todo =
+      receive do
+        message -> process_message(todo, message)
+      end
+
+    loop(new_todo)
+  end
+
+  def add_entry(todo_server, new_entry) do
+    send(todo_server, {:add_entry, new_entry})
+  end
+
+  defp process_message(todo, {:add_entry, new_entry}) do
+    Todo.add_entry(todo, new_entry)
+  end
+end
