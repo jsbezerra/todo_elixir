@@ -50,11 +50,11 @@ defmodule Todo do
     end
 
     defp into_callback(todo, {:cont, entry}) do
-      Todo.add_entry(todo, entry)
+      Todo.add_entry(%Todo{} = todo, entry)
     end
 
-    defp into_callback(todo, :done), do: todo
-    defp into_callback(todo, :halt), do: :ok
+    defp into_callback(%Todo{} = todo, :done), do: todo
+    defp into_callback(%Todo{} = _, :halt), do: :ok
   end
 end
 
@@ -90,6 +90,10 @@ defmodule TodoServer do
     send(todo_server, {:update_entry, entry})
   end
 
+  def delete_entry(todo_server, entry_id) do
+    send(todo_server, {:delete_entry, entry_id})
+  end
+
   defp process_message(todo, {:add_entry, new_entry}) do
     Todo.add_entry(todo, new_entry)
   end
@@ -101,5 +105,9 @@ defmodule TodoServer do
 
   defp process_message(todo, {:update_entry, entry}) do
     Todo.update_entry(todo, entry)
+  end
+
+  defp process_message(todo, {:delete_entry, entry_id}) do
+    Todo.delete_entry(todo, entry_id)
   end
 end
