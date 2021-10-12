@@ -22,7 +22,7 @@ defmodule TodoTest do
     server = TodoServer.start()
     TodoServer.add_entry(server, %{date: ~D[2018-12-19], title: "Dentist"})
     TodoServer.add_entry(server, %{date: ~D[2018-12-20], title: "Office"})
-    entries = [head | tail] = TodoServer.entries(server, ~D[2018-12-20])
+    entries = [head | _] = TodoServer.entries(server, ~D[2018-12-20])
     assert length(entries) === 1
     assert head.title === "Office"
     assert head.id === 2
@@ -36,7 +36,7 @@ defmodule TodoTest do
     assert length(TodoServer.entries(server)) == 2
 
     TodoServer.delete_entry(server, 2)
-    entries = [head | tail] = TodoServer.entries(server)
+    entries = [head | _] = TodoServer.entries(server)
     assert length(entries) === 1
     assert head.title === "Dentist"
     assert head.id === 1
