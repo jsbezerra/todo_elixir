@@ -64,70 +64,59 @@ defmodule Todo do
 end
 
 defmodule TodoServer do
+  use GenServer
+
   def start do
-    spawn(fn -> loop(Todo.new()) end)
+    GenServer.start(__MODULE__, nil)
   end
 
-  defp loop(todo) do
-    new_todo =
-      receive do
-        message -> process_message(todo, message)
-      end
-
-    loop(new_todo)
+  def add_entry(pid, new_entry) do
+    GenServer.cast(pid, {:add_entry, new_entry})
   end
 
-  def add_entry(todo_server, new_entry) do
-    send(todo_server, {:add_entry, new_entry})
+  def entries(pid) do
+    GenServer.call(pid, {:entries})
   end
 
-  def entries(todo_server) do
-    send(todo_server, {:entries, self()})
-
-    receive do
-      {:todo_entries, entries} -> entries
-    after
-      5000 -> {:error, :timeout}
-    end
+  def entries(pid, date) do
+    GenServer.call(pid, {:entries, date})
   end
 
-  def entries(todo_server, date) do
-    send(todo_server, {:entries, self(), date})
-
-    receive do
-      {:todo_entries, entries} -> entries
-    after
-      5000 -> {:error, :timeout}
-    end
+  def update_entry(pid, entry) do
+    GenServer.cast(pid, {:update_entry, entry})
   end
 
-  def update_entry(todo_server, entry) do
-    send(todo_server, {:update_entry, entry})
+  def delete_entry(pid, entry_id) do
+    GenServer.cast(pid, {:delete_entry, entry_id})
   end
 
-  def delete_entry(todo_server, entry_id) do
-    send(todo_server, {:delete_entry, entry_id})
+  @impl GenServer
+  def init(_) do
+    {:ok, Todo.new}
   end
 
-  defp process_message(todo, {:add_entry, new_entry}) do
-    Todo.add_entry(todo, new_entry)
+  @impl GenServer
+  def handle_cast({:add_entry, new_entry}, todo) do
+    {:noreply, Todo.add_entry(todo, new_entry)}
   end
 
-  defp process_message(todo, {:entries, caller}) do
-    send(caller, {:todo_entries, Todo.entries(todo)})
-    todo
+  @impl GenServer
+  def handle_cast({:update_entry, entry}, todo) do
+    {:noreply, Todo.update_entry(todo, entry)}
   end
 
-  defp process_message(todo, {:entries, caller, date}) do
-    send(caller, {:todo_entries, Todo.entries(todo, date)})
-    todo
+  @impl GenServer
+  def handle_cast({:delete_entry, entry_id}, todo) do
+    {:noreply, Todo.delete_entry(todo, entry_id)}
   end
 
-  defp process_message(todo, {:update_entry, entry}) do
-    Todo.update_entry(todo, entry)
+  @impl GenServer
+  def handle_call({:entries}, _, todo) do
+    {:reply, Todo.entries(todo), todo}
   end
 
-  defp process_message(todo, {:delete_entry, entry_id}) do
-    Todo.delete_entry(todo, entry_id)
+  @impl GenServer
+  def handle_call({:entries, date}, _, todo) do
+    {:reply, Todo.entries(todo, date), todo}
   end
 end
