@@ -2,7 +2,7 @@ defmodule KeyValueStore do
   use GenServer
 
   def start do
-    GenServer.start(KeyValueStore, nil)
+    GenServer.start(__MODULE__, nil)
   end
 
   def put(pid, key, value) do
