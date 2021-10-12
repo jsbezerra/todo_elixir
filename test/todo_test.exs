@@ -42,4 +42,22 @@ defmodule TodoTest do
     assert head.id === 1
     assert head.date === ~D[2018-12-19]
   end
+
+  test "update entry" do
+    {:ok, pid} = TodoServer.start()
+    TodoServer.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
+    TodoServer.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
+    assert length(TodoServer.entries(pid)) == 2
+    [head | _] = TodoServer.entries(pid)
+    assert head.title === "Dentist"
+    assert head.id === 1
+    assert head.date === ~D[2018-12-19]
+
+    new_entry = %{id: 1, date: ~D[2018-12-21], title: "Not Dentist Anymore"}
+    TodoServer.update_entry(pid, new_entry)
+    [head | _] = TodoServer.entries(pid)
+    assert head.title === "Not Dentist Anymore"
+    assert head.id === 1
+    assert head.date === ~D[2018-12-21]
+  end
 end
