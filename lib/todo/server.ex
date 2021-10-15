@@ -27,7 +27,7 @@ defmodule Todo.Server do
 
   @impl GenServer
   def init(_) do
-    {:ok, Todo.List.new}
+    {:ok, Todo.List.new()}
   end
 
   @impl GenServer
