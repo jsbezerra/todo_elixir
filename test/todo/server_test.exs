@@ -23,7 +23,8 @@ defmodule Todo.Server.Test do
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
 
-    assert [%{id: 2, date: ~D[2018-12-20], title: "Office"}] = Todo.Server.entries(pid, ~D[2018-12-20])
+    assert [%{id: 2, date: ~D[2018-12-20], title: "Office"}] =
+             Todo.Server.entries(pid, ~D[2018-12-20])
   end
 
   test "delete entries" do
