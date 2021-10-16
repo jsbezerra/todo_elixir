@@ -3,14 +3,16 @@ defmodule Todo.Server.Test do
   doctest Todo.Server
 
   test "newly created todo has no entries" do
-    {:ok, pid} = Todo.Server.start()
+    File.rm(".persist/list_1")
+    {:ok, pid} = Todo.Server.start("list_1")
     assert length(Todo.Server.entries(pid)) === 0
   end
 
   test "new entries are persisted" do
-    {:ok, pid} = Todo.Server.start()
+    File.rm(".persist/list_2")
+    {:ok, pid} = Todo.Server.start("list_2")
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
-    Todo.Server.entries(pid)
+    assert length(Todo.Server.entries(pid)) === 1
     assert length(Todo.Server.entries(pid)) === 1
 
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
@@ -18,7 +20,8 @@ defmodule Todo.Server.Test do
   end
 
   test "retrieve entries by date" do
-    {:ok, pid} = Todo.Server.start()
+    File.rm(".persist/list_3")
+    {:ok, pid} = Todo.Server.start("list_3")
 
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
@@ -28,7 +31,8 @@ defmodule Todo.Server.Test do
   end
 
   test "delete entries" do
-    {:ok, pid} = Todo.Server.start()
+    File.rm(".persist/list_4")
+    {:ok, pid} = Todo.Server.start("list_4")
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
 
@@ -43,7 +47,8 @@ defmodule Todo.Server.Test do
   end
 
   test "update entry" do
-    {:ok, pid} = Todo.Server.start()
+    File.rm(".persist/list_5")
+    {:ok, pid} = Todo.Server.start("list_5")
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-19], title: "Dentist"})
     Todo.Server.add_entry(pid, %{date: ~D[2018-12-20], title: "Office"})
 

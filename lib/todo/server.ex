@@ -1,8 +1,9 @@
 defmodule Todo.Server do
   use GenServer
 
-  def start do
-    GenServer.start(__MODULE__, nil)
+  def start(name) do
+    Todo.File.start()
+    GenServer.start(__MODULE__, name)
   end
 
   def add_entry(pid, new_entry) do
@@ -26,32 +27,34 @@ defmodule Todo.Server do
   end
 
   @impl GenServer
-  def init(_) do
-    {:ok, Todo.List.new()}
+  def init(name) do
+    {:ok, {name, Todo.File.get(name) || Todo.List.new()}}
   end
 
   @impl GenServer
-  def handle_cast({:add_entry, new_entry}, todo) do
-    {:noreply, Todo.List.add_entry(todo, new_entry)}
+  def handle_cast({:add_entry, new_entry}, {name, todo}) do
+    modified_list = Todo.List.add_entry(todo, new_entry)
+    Todo.File.store(name, modified_list)
+    {:noreply, {name, modified_list}}
   end
 
   @impl GenServer
-  def handle_cast({:update_entry, entry}, todo) do
-    {:noreply, Todo.List.update_entry(todo, entry)}
+  def handle_cast({:update_entry, entry}, {name, todo}) do
+    {:noreply, {name, Todo.List.update_entry(todo, entry)}}
   end
 
   @impl GenServer
-  def handle_cast({:delete_entry, entry_id}, todo) do
-    {:noreply, Todo.List.delete_entry(todo, entry_id)}
+  def handle_cast({:delete_entry, entry_id}, {name, todo}) do
+    {:noreply, {name, Todo.List.delete_entry(todo, entry_id)}}
   end
 
   @impl GenServer
-  def handle_call({:entries}, _, todo) do
-    {:reply, Todo.List.entries(todo), todo}
+  def handle_call({:entries}, _, {name, todo}) do
+    {:reply, Todo.List.entries(todo), {name, todo}}
   end
 
   @impl GenServer
-  def handle_call({:entries, date}, _, todo) do
-    {:reply, Todo.List.entries(todo, date), todo}
+  def handle_call({:entries, date}, _, {name, todo}) do
+    {:reply, Todo.List.entries(todo, date), {name, todo}}
   end
 end

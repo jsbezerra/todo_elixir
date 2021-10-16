@@ -14,6 +14,8 @@ defmodule Todo.Cache.Test do
   end
 
   test "persist an entry" do
+    File.rm(".persist/groceries")
+    File.rm(".persist/places")
     {:ok, cache_pid} = Todo.Cache.start()
     places_pid = Todo.Cache.server_process(cache_pid, :places)
     Todo.Server.add_entry(places_pid, %{date: ~D[2018-12-19], title: "Dentist"})
