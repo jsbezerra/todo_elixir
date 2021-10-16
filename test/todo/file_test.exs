@@ -4,11 +4,15 @@ defmodule Todo.File.Test do
 
   test "cache successfully starts" do
     case Todo.File.start() do
-      {:ok, _} -> :ok
-      {:error, {reason, pid}} ->
+      {:ok, _} ->
+        :ok
+
+      {:error, {reason, _pid}} ->
         assert reason === :already_started
         :ok
-      _ -> :error
+
+      _ ->
+        :error
     end
   end
 end
