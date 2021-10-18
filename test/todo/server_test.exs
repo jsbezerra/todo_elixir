@@ -2,6 +2,13 @@ defmodule Todo.Server.Test do
   use ExUnit.Case
   doctest Todo.Server
 
+  setup_all do
+    case Todo.File.start() do
+      {:ok, pid} -> :ok
+      _ -> :error
+    end
+  end
+
   test "newly created todo has no entries" do
     File.rm(".persist/list_1")
     {:ok, pid} = Todo.Server.start("list_1")

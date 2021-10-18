@@ -49,6 +49,10 @@ defmodule Todo.List do
     end
   end
 
+  def size(list) do
+    length(Todo.List.entries(list))
+  end
+
   defimpl Collectable, for: Todo.List do
     def into(original) do
       {original, &into_callback/2}

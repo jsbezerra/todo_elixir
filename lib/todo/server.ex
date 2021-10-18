@@ -2,7 +2,6 @@ defmodule Todo.Server do
   use GenServer
 
   def start(name) do
-    Todo.File.start()
     GenServer.start(__MODULE__, name)
   end
 

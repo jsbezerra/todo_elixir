@@ -1,35 +1,38 @@
-defmodule Todo.Cache.Test do
+defmodule TodoCacheTest do
   use ExUnit.Case
-  doctest Todo.Cache
 
-  test "cache successfully starts" do
-    {status, _} = Todo.Cache.start()
-    assert status === :ok
+  test "server_process" do
+    {:ok, cache} = Todo.Cache.start()
+    bob_pid = Todo.Cache.server_process(cache, "bob")
+
+    assert bob_pid != Todo.Cache.server_process(cache, "alice")
+    assert bob_pid == Todo.Cache.server_process(cache, "bob")
   end
 
-  test "create a new server" do
-    {:ok, cache_pid} = Todo.Cache.start()
-    server1_pid = Todo.Cache.server_process(cache_pid, :list1)
-    assert length(Todo.Server.entries(server1_pid)) === 0
+  test "to-do operations" do
+    {:ok, cache} = Todo.Cache.start()
+    alice = Todo.Cache.server_process(cache, "alice")
+    Todo.Server.add_entry(alice, %{date: ~D[2018-12-19], title: "Dentist"})
+    entries = Todo.Server.entries(alice, ~D[2018-12-19])
+
+    assert [%{date: ~D[2018-12-19], title: "Dentist"}] = entries
   end
 
-  test "persist an entry" do
-    File.rm(".persist/groceries")
-    File.rm(".persist/places")
-    {:ok, cache_pid} = Todo.Cache.start()
-    places_pid = Todo.Cache.server_process(cache_pid, :places)
-    Todo.Server.add_entry(places_pid, %{date: ~D[2018-12-19], title: "Dentist"})
+  test "persistence" do
+    {:ok, cache} = Todo.Cache.start()
 
-    new_places_pid = Todo.Cache.server_process(cache_pid, :places)
-    Todo.Server.add_entry(new_places_pid, %{date: ~D[2018-12-20], title: "Office"})
+    john = Todo.Cache.server_process(cache, "john")
+    Todo.Server.add_entry(john, %{date: ~D[2018-12-20], title: "Shopping"})
+    assert 1 == length(Todo.Server.entries(john, ~D[2018-12-20]))
 
-    groceries_pid = Todo.Cache.server_process(cache_pid, :groceries)
-    Todo.Server.add_entry(groceries_pid, %{date: ~D[2018-12-20], title: "Lettuce"})
+    GenServer.stop(cache)
+    {:ok, cache} = Todo.Cache.start()
 
-    assert length(Todo.Server.entries(places_pid)) === 2
-    assert length(Todo.Server.entries(groceries_pid)) === 1
+    entries =
+      cache
+      |> Todo.Cache.server_process("john")
+      |> Todo.Server.entries(~D[2018-12-20])
 
-    assert places_pid === new_places_pid
-    assert places_pid !== groceries_pid
+    assert [%{date: ~D[2018-12-20], title: "Shopping"}] = entries
   end
 end
