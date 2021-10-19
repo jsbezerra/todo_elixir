@@ -50,6 +50,16 @@ defmodule TodoListTest do
     assert [%{title: "Updated shopping"}] = Todo.List.entries(todo_list, ~D[2018-12-20])
   end
 
+  test "update_entry with non existing entry" do
+    todo_list =
+      Todo.List.new()
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Dentist"})
+      |> Todo.List.update_entry(2, &Map.put(&1, :title, "Updated Dentist"))
+
+    assert Todo.List.size(todo_list) == 1
+    assert [%{title: "Dentist"}] = Todo.List.entries(todo_list, ~D[2018-12-19])
+  end
+
   test "delete_entry" do
     todo_list =
       Todo.List.new()
