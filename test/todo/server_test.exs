@@ -4,7 +4,7 @@ defmodule Todo.Server.Test do
 
   setup_all do
     case Todo.File.start() do
-      {:ok, pid} -> :ok
+      {:ok, _} -> :ok
       _ -> :error
     end
   end
