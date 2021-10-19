@@ -3,10 +3,11 @@ defmodule Todo.Server.Test do
   doctest Todo.Server
 
   setup_all do
-    case Todo.File.start() do
+    case Todo.File.start_link(nil) do
       {:ok, _} -> :ok
       _ -> :error
     end
+    on_exit(fn -> Process.exit(Process.whereis(Todo.File), :kill) end)
   end
 
   test "newly created todo has no entries" do

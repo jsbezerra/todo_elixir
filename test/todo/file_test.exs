@@ -3,7 +3,7 @@ defmodule Todo.File.Test do
   doctest Todo.File
 
   test "cache successfully starts" do
-    case Todo.File.start() do
+    case Todo.File.start_link(nil) do
       {:ok, _} ->
         :ok
 

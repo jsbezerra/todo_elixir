@@ -12,7 +12,6 @@ defmodule Todo.Cache do
 
   @impl GenServer
   def init(_) do
-    Todo.File.start()
     {:ok, %{}}
   end
 

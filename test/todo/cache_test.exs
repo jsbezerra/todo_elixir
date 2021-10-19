@@ -1,6 +1,14 @@
 defmodule TodoCacheTest do
   use ExUnit.Case
 
+  setup_all do
+    case Todo.File.start_link(nil) do
+      {:ok, _} -> :ok
+      _ -> :error
+    end
+    on_exit(fn -> Process.exit(Process.whereis(Todo.File), :kill) end)
+  end
+
   test "server_process" do
     {:ok, _} = Todo.Cache.start_link(nil)
     bob_pid = Todo.Cache.server_process("bob")
