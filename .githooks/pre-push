@@ -1,5 +1,5 @@
 #!/bin/sh
+# exit when any command fails
+set -e
 
 mix format --check-formatted
-
-exit 0
