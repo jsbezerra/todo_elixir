@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mix format --check-formatted
+
+exit 0
