@@ -7,6 +7,7 @@ defmodule Todo.Server.Test do
       {:ok, _} -> :ok
       _ -> :error
     end
+
     on_exit(fn -> Process.exit(Process.whereis(Todo.File), :kill) end)
   end
 
