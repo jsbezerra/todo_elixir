@@ -2,16 +2,11 @@ defmodule TodoCacheTest do
   use ExUnit.Case
 
   setup_all do
-    case Todo.File.start_link(nil) do
-      {:ok, _} -> :ok
-      _ -> :error
-    end
-
-    on_exit(fn -> Process.exit(Process.whereis(Todo.File), :kill) end)
+    {:ok, todo_system_pid} = Todo.System.start_link()
+    {:ok, todo_system_pid: todo_system_pid}
   end
 
   test "server_process" do
-    {:ok, _} = Todo.Cache.start_link(nil)
     bob_pid = Todo.Cache.server_process("bob")
 
     assert bob_pid != Todo.Cache.server_process("alice")
@@ -19,28 +14,48 @@ defmodule TodoCacheTest do
   end
 
   test "to-do operations" do
-    {:ok, _} = Todo.Cache.start_link(nil)
-    alice = Todo.Cache.server_process("alice")
-    Todo.Server.add_entry(alice, %{date: ~D[2018-12-19], title: "Dentist"})
-    entries = Todo.Server.entries(alice, ~D[2018-12-19])
+    jane = Todo.Cache.server_process("jane")
+    Todo.Server.add_entry(jane, %{date: ~D[2018-12-19], title: "Dentist"})
+    entries = Todo.Server.entries(jane, ~D[2018-12-19])
 
     assert [%{date: ~D[2018-12-19], title: "Dentist"}] = entries
   end
 
-  test "persistence" do
-    {:ok, cache} = Todo.Cache.start_link(nil)
-
+  test "persistence", context do
     john = Todo.Cache.server_process("john")
     Todo.Server.add_entry(john, %{date: ~D[2018-12-20], title: "Shopping"})
     assert 1 == length(Todo.Server.entries(john, ~D[2018-12-20]))
 
-    GenServer.stop(cache)
-    {:ok, _} = Todo.Cache.start_link(nil)
+    Supervisor.terminate_child(context.todo_system_pid, Todo.Cache)
+    Supervisor.restart_child(context.todo_system_pid, Todo.Cache)
 
     entries =
-      Todo.Cache.server_process("john")
+      "john"
+      |> Todo.Cache.server_process()
       |> Todo.Server.entries(~D[2018-12-20])
 
     assert [%{date: ~D[2018-12-20], title: "Shopping"}] = entries
+  end
+
+  test "update_entry" do
+    maria = Todo.Cache.server_process("maria")
+    Todo.Server.add_entry(maria, %{date: ~D[2018-12-20], title: "Shopping"})
+    Todo.Server.add_entry(maria, %{date: ~D[2018-12-19], title: "Dentist"})
+    Todo.Server.add_entry(maria, %{date: ~D[2018-12-19], title: "Movies"})
+    Todo.Server.update_entry(maria, %{title: "Updated shopping", date: ~D[2018-12-20], id: 1})
+
+    assert length(Todo.Server.entries(maria)) === 3
+    assert [%{title: "Updated shopping"}] = Todo.Server.entries(maria, ~D[2018-12-20])
+  end
+
+  test "delete_entry" do
+    caleb = Todo.Cache.server_process("Caleb")
+    Todo.Server.add_entry(caleb, %{date: ~D[2018-12-19], title: "Dentist"})
+    Todo.Server.add_entry(caleb, %{date: ~D[2018-12-20], title: "Shopping"})
+    Todo.Server.add_entry(caleb, %{date: ~D[2018-12-19], title: "Movies"})
+    Todo.Server.delete_entry(caleb, 2)
+
+    assert length(Todo.Server.entries(caleb)) == 2
+    assert Todo.Server.entries(caleb, ~D[2018-12-20]) == []
   end
 end
