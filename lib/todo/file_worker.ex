@@ -2,7 +2,7 @@ defmodule Todo.FileWorker do
   use GenServer
 
   def start_link({folder, worker_id}) do
-    IO.puts("Starting file worker #{worker_id}}")
+    IO.puts("Starting file worker #{worker_id}")
     GenServer.start_link(__MODULE__, folder, name: via_tuple(worker_id))
   end
 
