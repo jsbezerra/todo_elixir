@@ -1,6 +1,8 @@
 defmodule Todo.Server do
   use GenServer, restart: :temporary
 
+  @expiry_idle_timeout :timer.seconds(10)
+
   def start_link(name) do
     GenServer.start_link(Todo.Server, name, name: via_tuple(name))
   end
@@ -32,33 +34,39 @@ defmodule Todo.Server do
   @impl GenServer
   def init(name) do
     IO.puts("Starting to-do server for #{name}")
-    {:ok, {name, Todo.File.get(name) || Todo.List.new()}}
+    {:ok, {name, Todo.File.get(name) || Todo.List.new()}, @expiry_idle_timeout}
   end
 
   @impl GenServer
   def handle_cast({:add_entry, new_entry}, {name, todo}) do
     modified_list = Todo.List.add_entry(todo, new_entry)
     Todo.File.store(name, modified_list)
-    {:noreply, {name, modified_list}}
+    {:noreply, {name, modified_list}, @expiry_idle_timeout}
   end
 
   @impl GenServer
   def handle_cast({:update_entry, entry}, {name, todo}) do
-    {:noreply, {name, Todo.List.update_entry(todo, entry)}}
+    {:noreply, {name, Todo.List.update_entry(todo, entry)}, @expiry_idle_timeout}
   end
 
   @impl GenServer
   def handle_cast({:delete_entry, entry_id}, {name, todo}) do
-    {:noreply, {name, Todo.List.delete_entry(todo, entry_id)}}
+    {:noreply, {name, Todo.List.delete_entry(todo, entry_id)}, @expiry_idle_timeout}
   end
 
   @impl GenServer
   def handle_call({:entries}, _, {name, todo}) do
-    {:reply, Todo.List.entries(todo), {name, todo}}
+    {:reply, Todo.List.entries(todo), {name, todo}, @expiry_idle_timeout}
   end
 
   @impl GenServer
   def handle_call({:entries, date}, _, {name, todo}) do
-    {:reply, Todo.List.entries(todo, date), {name, todo}}
+    {:reply, Todo.List.entries(todo, date), {name, todo}, @expiry_idle_timeout}
+  end
+
+  @impl true
+  def handle_info(:timeout, {name, todo}) do
+    IO.puts("Stopping to-do server for #{name}")
+    {:stop, :normal, {name, todo}}
   end
 end
