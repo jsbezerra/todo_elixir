@@ -1,8 +1,8 @@
 defmodule Todo.Web do
   use Plug.Router
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
   get "/entries" do
     conn = Plug.Conn.fetch_query_params(conn)
