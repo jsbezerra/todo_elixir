@@ -23,10 +23,11 @@ defmodule Todo.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:poolboy, "~> 1.5"},
       {:cowboy, "~>2.9"},
-      {:plug_cowboy, "~> 2.5"},
-      {:plug, "~> 1.12"}
+      {:distillery, "~> 2.1"},
+      {:poolboy, "~> 1.5"},
+      {:plug, "~> 1.12"},
+      {:plug_cowboy, "~> 2.5"}
     ]
   end
 end
